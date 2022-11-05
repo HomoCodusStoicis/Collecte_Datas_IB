@@ -47,7 +47,7 @@ Future_NomContrat=ListeContrats[contrat_courant][0]
 Future_EcheanceContrat=ListeContrats[contrat_courant][1]
 
 import argparse
-
+import numpy
 import collections
 import inspect
 import shutil
@@ -1052,7 +1052,7 @@ class IBApi(EWrapper, EClient):
     @iswrapper
     # ! [historicaldata]
     def historicalData(self, reqId:int, bar: BarData):
-        #print(threading.currentThread().getName() , ts, "historicalData - ReqId:", reqId, bar.date)
+        #print(threading.current_thread().getName() , ts, "historicalData - ReqId:", reqId, bar.date)
 
         isPeriodeCourante15min = False
         isPeriodeCourante5min  = False
@@ -1085,7 +1085,7 @@ class IBApi(EWrapper, EClient):
     # ! [historicaldataend]
     def historicalDataEnd(self, reqId: int, start: str, end: str):
         super().historicalDataEnd(reqId, start, end)
-        print(threading.currentThread().getName() , "Fin réception flux - HistoricalDataEnd - ReqId:", reqId, "from", start, "to", end)
+        print(threading.current_thread().getName() , "Fin réception flux - HistoricalDataEnd - ReqId:", reqId, "from", start, "to", end)
         
         bot.on_historicalDataEnd(reqId)
    
@@ -1095,7 +1095,7 @@ class IBApi(EWrapper, EClient):
     # ! [historicalDataUpdate]
     def historicalDataUpdate(self, reqId: int, bar: BarData):
         ts = datetime.datetime.fromtimestamp(tm.time()).strftime("%Y%m%d %H:%M:%S")
-        #print(threading.currentThread().getName() , ts, "historicalDataUpdate - ReqId:", reqId, bar.date)
+        #print(threading.current_thread().getName() , ts, "historicalDataUpdate - ReqId:", reqId, bar.date)
         
         bot.on_bar_update(reqId, bar)
     # ! [historicalDataUpdate]
@@ -1250,7 +1250,8 @@ class Bot():
         self.i_5min=0
         self.i_1min=0
         self.i_day_2 = 0
-        self.cpt = pd.DataFrame(columns=['reqId','i','Contrat','Echeance','Periode','date','bar','BougieClotured'])
+        self.cpt = pd.DataFrame(columns=['reqId','i','Contrat','Echeance','Periode','date','bar','BougieClotured','DateCouranteD'])
+        self.cpt = self.cpt.astype({'reqId':numpy.int64, 'i':numpy.int64, 'Contrat':object, 'Echeance':object, 'Periode':object, 'BougieClotured':bool, 'DateCouranteD':object})
         # self.DateCourDt = datetime.datetime.strptime(DateStr, '%Y-%m-%d') 
 
 
@@ -1351,8 +1352,10 @@ class Bot():
                 print("Proondeur historique:",ProfondeurHistorique)
                 self.ib.increment_id()
                 logging.error("Appel requete reqHistoricalData 15 mins..." + Future_NomContrat + "IdReq=" + str(self.ib.reqID))
-                self.cpt = self.cpt.append({'reqId':self.ib.reqID, 'i':0, 'Contrat': Future_NomContrat, 'Echeance':Future_EcheanceContrat,
-                                            'Periode': '15min', 'BougieClotured':False, 'DateCouranteD':DateCourD}, ignore_index=True)
+                cpt2 = pd.DataFrame.from_dict([{'reqId':self.ib.reqID, 'i':0, 'Contrat': Future_NomContrat, 'Echeance':Future_EcheanceContrat,
+                                            'Periode': '15min', 'BougieClotured':False, 'DateCouranteD':DateCourD}])
+               
+                self.cpt = pd.concat([ cpt2, self.cpt], ignore_index=True)
                 self.ib.reqHistoricalData(self.ib.reqID, self.ib.contract, DateFinStrQuery,
                                   ProfondeurHistorique, "15 mins", "TRADES", 0, 1, False, [])
                 
@@ -1360,16 +1363,20 @@ class Bot():
                 # ProfondeurHistorique = "25 D"
                 self.ib.increment_id()
                 logging.error("Appel requete reqHistoricalData 5 mins..." + Future_NomContrat + "IdReq=" + str(self.ib.reqID))
-                self.cpt = self.cpt.append({'reqId':self.ib.reqID, 'i':0, 'Contrat': Future_NomContrat,  'Echeance':Future_EcheanceContrat,
-                                            'Periode': '5min', 'BougieClotured':False, 'DateCouranteD':DateCourD}, ignore_index=True)
+                cpt2 = pd.DataFrame.from_dict([{'reqId':self.ib.reqID, 'i':0, 'Contrat': Future_NomContrat, 'Echeance':Future_EcheanceContrat,
+                                            'Periode': '5min', 'BougieClotured':False, 'DateCouranteD':DateCourD}])
+              
+                self.cpt = pd.concat([cpt2, self.cpt], ignore_index=True)
                 self.ib.reqHistoricalData(self.ib.reqID, self.ib.contract, DateFinStrQuery,
                                   ProfondeurHistorique, "5 mins", "TRADES", 0, 1, False, [])
 
                 # ProfondeurHistorique = "25 D"
                 self.ib.increment_id()
                 logging.error("Appel requete reqHistoricalData 1 min..." + Future_NomContrat + "IdReq=" + str(self.ib.reqID))
-                self.cpt = self.cpt.append({'reqId':self.ib.reqID, 'i':0, 'Contrat': Future_NomContrat,  'Echeance':Future_EcheanceContrat,
-                                            'Periode': '1min', 'BougieClotured':False, 'DateCouranteD':DateCourD}, ignore_index=True)
+                cpt2 = pd.DataFrame.from_dict([{'reqId':self.ib.reqID, 'i':0, 'Contrat': Future_NomContrat, 'Echeance':Future_EcheanceContrat,
+                                            'Periode': '1min', 'BougieClotured':False, 'DateCouranteD':DateCourD}])
+                  
+                self.cpt = pd.concat([cpt2, self.cpt], ignore_index=True)
                 self.ib.reqHistoricalData(self.ib.reqID, self.ib.contract, DateFinStrQuery,
                                   ProfondeurHistorique, "1 min", "TRADES", 0, 1, False, [])
 
@@ -1413,7 +1420,7 @@ class Bot():
         Periode = self.cpt.loc[F,'Periode'].values[0]
         
         # if Contrat == 'YM':
-        #     print(ts, threading.currentThread().getName() , "on_bar_update - ReqId:", reqId, ' Bar:', bar)
+        #     print(ts, threading.current_thread().getName() , "on_bar_update - ReqId:", reqId, ' Bar:', bar)
 
         FlagAppelMajTabIndicateurs = False
 
@@ -1428,7 +1435,7 @@ class Bot():
 
                 #print("on_bar_update bar sur bougie cloturée")
                 print("")
-                print(ts, threading.currentThread().getName() , "on_bar_update sur bougie cloturée - ReqId:", reqId, lastTs)
+                print(ts, threading.current_thread().getName() , "on_bar_update sur bougie cloturée - ReqId:", reqId, lastTs)
                 lastBar = self.cpt.loc[F,'bar'].values[0]
                 # print(ts, "  dernière valeur connues : ", lastBar.date, "open:", lastBar.open, "close:",lastBar.close)
 
@@ -1680,7 +1687,7 @@ class Bot():
 
     def  maj_Indicateurs(self, reqId):
 
-        print(threading.currentThread().getName() , "maj_Indicateurs - ReqId:", reqId)
+        print(threading.current_thread().getName() , "maj_Indicateurs - ReqId:", reqId)
 
 
         F=(self.cpt['reqId'] == reqId)

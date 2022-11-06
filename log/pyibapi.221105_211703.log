@@ -1,0 +1,37 @@
+(MainThread) 221105_21:17:03.505 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1210 now is 2022-11-05 21:17:03.505068
+(MainThread) 221105_21:17:04.723 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1266 serverVersion:157 connectionTime:b'20221105 21:17:04 CET'
+(MainThread) 221105_21:17:04.724 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1272 Avant creation thread...
+(MainThread) 221105_21:17:04.724 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1274 Après creation thread...
+(MainThread) 221105_21:17:04.725 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1276 Après start thread...
+(MainThread) 221105_21:17:04.726 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1279 Dans start...
+(MainThread) 221105_21:17:04.732 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1353 Appel requete reqHistoricalData 15 mins...NASDAQ-miniIdReq=2
+(Thread-2 (run_loop)) 221105_21:17:04.732 ERROR wrapper.py:56 ERROR -1 2104 La connexion de données de marché est OK:eufarm
+(Thread-2 (run_loop)) 221105_21:17:04.733 ERROR wrapper.py:56 ERROR -1 2104 La connexion de données de marché est OK:eufarmnj
+(Thread-2 (run_loop)) 221105_21:17:04.735 ERROR wrapper.py:56 ERROR -1 2106 La connexion de données HMDS est OK:euhmds
+(Thread-2 (run_loop)) 221105_21:17:04.738 ERROR wrapper.py:56 ERROR -1 2106 La connexion de données HMDS est OK:fundfarm
+(Thread-2 (run_loop)) 221105_21:17:04.741 ERROR wrapper.py:56 ERROR -1 2106 La connexion de données HMDS est OK:ushmds
+(MainThread) 221105_21:17:04.745 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1371 Appel requete reqHistoricalData 5 mins...NASDAQ-miniIdReq=3
+(Thread-2 (run_loop)) 221105_21:17:04.745 ERROR wrapper.py:56 ERROR -1 2158 La connexion de la batterie de serveurs Sec-def est OK:secdefeu
+(Thread-2 (run_loop)) 221105_21:17:04.749 ERROR wrapper.py:56 ERROR 2 2174 Avertissement: You submitted request with date-time attributes without explicit time zone. Please switch to use yyyymmdd-hh:mm:ss in UTC or use instrument time zone, like US/Eastern. Implied time zone functionality will be removed in the next API release
+(MainThread) 221105_21:17:04.759 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1388 Appel requete reqHistoricalData 1 min...NASDAQ-miniIdReq=4
+(MainThread) 221105_21:17:04.769 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1353 Appel requete reqHistoricalData 15 mins...NASDAQ-miniIdReq=6
+(MainThread) 221105_21:17:04.781 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1371 Appel requete reqHistoricalData 5 mins...NASDAQ-miniIdReq=7
+(MainThread) 221105_21:17:04.791 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1388 Appel requete reqHistoricalData 1 min...NASDAQ-miniIdReq=8
+(MainThread) 221105_21:17:04.801 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1353 Appel requete reqHistoricalData 15 mins...DOW-miniIdReq=10
+(MainThread) 221105_21:17:04.814 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1371 Appel requete reqHistoricalData 5 mins...DOW-miniIdReq=11
+(MainThread) 221105_21:17:04.826 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1388 Appel requete reqHistoricalData 1 min...DOW-miniIdReq=12
+(MainThread) 221105_21:17:04.836 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1353 Appel requete reqHistoricalData 15 mins...DOW-miniIdReq=14
+(MainThread) 221105_21:17:04.847 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1371 Appel requete reqHistoricalData 5 mins...DOW-miniIdReq=15
+(MainThread) 221105_21:17:04.857 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1388 Appel requete reqHistoricalData 1 min...DOW-miniIdReq=16
+(MainThread) 221105_21:17:04.870 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1353 Appel requete reqHistoricalData 15 mins...DAX-miniIdReq=18
+(MainThread) 221105_21:17:04.882 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1371 Appel requete reqHistoricalData 5 mins...DAX-miniIdReq=19
+(MainThread) 221105_21:17:04.896 ERROR wrapper.py:56 ERROR 19 504 Not connected
+(MainThread) 221105_21:17:04.897 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1388 Appel requete reqHistoricalData 1 min...DAX-miniIdReq=20
+(MainThread) 221105_21:17:04.909 ERROR wrapper.py:56 ERROR 20 504 Not connected
+(MainThread) 221105_21:17:04.910 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1353 Appel requete reqHistoricalData 15 mins...DAX-miniIdReq=22
+(MainThread) 221105_21:17:04.920 ERROR wrapper.py:56 ERROR 22 504 Not connected
+(MainThread) 221105_21:17:04.924 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1371 Appel requete reqHistoricalData 5 mins...DAX-miniIdReq=23
+(MainThread) 221105_21:17:04.934 ERROR wrapper.py:56 ERROR 23 504 Not connected
+(MainThread) 221105_21:17:04.934 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1388 Appel requete reqHistoricalData 1 min...DAX-miniIdReq=24
+(MainThread) 221105_21:17:04.952 ERROR wrapper.py:56 ERROR 24 504 Not connected
+(MainThread) 221105_21:17:04.953 ERROR GT_01_GetHLCS_15m_5m_1m_v2.py:1417 Après lancement thread ib...

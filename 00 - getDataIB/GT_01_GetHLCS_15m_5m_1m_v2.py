@@ -1052,7 +1052,7 @@ class IBApi(EWrapper, EClient):
     @iswrapper
     # ! [historicaldata]
     def historicalData(self, reqId:int, bar: BarData):
-        #print(threading.current_thread().getName() , ts, "historicalData - ReqId:", reqId, bar.date)
+        #print(threading.current_thread().name , ts, "historicalData - ReqId:", reqId, bar.date)
 
         isPeriodeCourante15min = False
         isPeriodeCourante5min  = False
@@ -1085,7 +1085,7 @@ class IBApi(EWrapper, EClient):
     # ! [historicaldataend]
     def historicalDataEnd(self, reqId: int, start: str, end: str):
         super().historicalDataEnd(reqId, start, end)
-        print(threading.current_thread().getName() , "Fin réception flux - HistoricalDataEnd - ReqId:", reqId, "from", start, "to", end)
+        print(threading.current_thread().name , "Fin réception flux - HistoricalDataEnd - ReqId:", reqId, "from", start, "to", end)
         
         bot.on_historicalDataEnd(reqId)
    
@@ -1095,7 +1095,7 @@ class IBApi(EWrapper, EClient):
     # ! [historicalDataUpdate]
     def historicalDataUpdate(self, reqId: int, bar: BarData):
         ts = datetime.datetime.fromtimestamp(tm.time()).strftime("%Y%m%d %H:%M:%S")
-        #print(threading.current_thread().getName() , ts, "historicalDataUpdate - ReqId:", reqId, bar.date)
+        #print(threading.current_thread().name , ts, "historicalDataUpdate - ReqId:", reqId, bar.date)
         
         bot.on_bar_update(reqId, bar)
     # ! [historicalDataUpdate]
@@ -1328,7 +1328,7 @@ class Bot():
                 #     DateFinDt=datetime.datetime.today()
                 
                 d = DateInFinStr
-                DateFinStrQuery = d[0:4] + d[5:7] + d[8:10] + ' 23:59:59'
+                DateFinStrQuery = d[0:4] + d[5:7] + d[8:10] + '-23:59:59'
                 DateCourDt = DateInDebDt
                 DateCourD = DateCourDt.date()
                 # ProfondeurHistorique = "60 D"
@@ -1411,7 +1411,7 @@ class Bot():
         
         ts = datetime.datetime.today()
 
-        #if reading.currentThread().getName() , "on_bar_update - ReqId:", reqId, ' Bar:', bar)
+        #if reading.currentthread().name , "on_bar_update - ReqId:", reqId, ' Bar:', bar)
         #Historisation de la barre si la bougie temps réelle est cloturée :
         F=(self.cpt['reqId'] == reqId)
         lastTs = self.cpt.loc[F,'date'].values[0]
@@ -1420,7 +1420,7 @@ class Bot():
         Periode = self.cpt.loc[F,'Periode'].values[0]
         
         # if Contrat == 'YM':
-        #     print(ts, threading.current_thread().getName() , "on_bar_update - ReqId:", reqId, ' Bar:', bar)
+        #     print(ts, threading.current_thread().name , "on_bar_update - ReqId:", reqId, ' Bar:', bar)
 
         FlagAppelMajTabIndicateurs = False
 
@@ -1435,7 +1435,7 @@ class Bot():
 
                 #print("on_bar_update bar sur bougie cloturée")
                 print("")
-                print(ts, threading.current_thread().getName() , "on_bar_update sur bougie cloturée - ReqId:", reqId, lastTs)
+                print(ts, threading.current_thread().name , "on_bar_update sur bougie cloturée - ReqId:", reqId, lastTs)
                 lastBar = self.cpt.loc[F,'bar'].values[0]
                 # print(ts, "  dernière valeur connues : ", lastBar.date, "open:", lastBar.open, "close:",lastBar.close)
 
@@ -1687,7 +1687,7 @@ class Bot():
 
     def  maj_Indicateurs(self, reqId):
 
-        print(threading.current_thread().getName() , "maj_Indicateurs - ReqId:", reqId)
+        print(threading.current_thread().name , "maj_Indicateurs - ReqId:", reqId)
 
 
         F=(self.cpt['reqId'] == reqId)

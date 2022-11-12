@@ -247,7 +247,7 @@ class IBApi(EWrapper, EClient):
         elif NomContrat in ["YM", "DOW-mini"]:
             contract.symbol = "YM"
             contract.secType = "FUT"
-            contract.exchange = "ECBOT"
+            contract.exchange = "CBOT"
             contract.currency = "USD"
             contract.lastTradeDateOrContractMonth = EcheanceContrat
             contract.multiplier = "5"
@@ -255,7 +255,7 @@ class IBApi(EWrapper, EClient):
         elif NomContrat in ["NQ", "NASDAQ-mini"]:
             contract.symbol = "NQ"
             contract.secType = "FUT"
-            contract.exchange = "GLOBEX"
+            contract.exchange = "CME"
             contract.currency = "USD"
             contract.lastTradeDateOrContractMonth = EcheanceContrat
             contract.multiplier = "20"

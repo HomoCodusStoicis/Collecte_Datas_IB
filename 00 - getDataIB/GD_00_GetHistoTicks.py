@@ -5,6 +5,7 @@ Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is su
 
 
 import datetime
+
 HierStr = (datetime.datetime.today() + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")
 
 DateinDebStr="2022-09-22"
@@ -44,47 +45,43 @@ Future_EcheanceContrat=ListeContrats[contrat_courant][1]
 import argparse
 import datetime
 import collections
+import datetime
 import inspect
-
 import logging
-import time as tm
 import os.path
+import time as tm
+from math import pi
 
-from ibapi import wrapper
-from ibapi import utils
+#import Niveaux, Horaires
+import pandas as pd
+from bokeh.io import export_png
+from bokeh.models import (DatetimeTickFormatter, DaysTicker, FuncTickFormatter,
+                          LinearAxis, Range1d)
+from bokeh.models.tickers import FixedTicker
+from bokeh.plotting import figure, output_file, save, show
+from ContractSamples import ContractSamples
+from ibapi import utils, wrapper
+from ibapi.account_summary_tags import *
 from ibapi.client import EClient
+from ibapi.commission_report import CommissionReport
+# types
+from ibapi.common import *  # @UnusedWildImport
+from ibapi.contract import *  # @UnusedWildImport
+from ibapi.execution import Execution, ExecutionFilter
+from ibapi.order import *  # @UnusedWildImport
+from ibapi.order_condition import *  # @UnusedWildImport
+from ibapi.order_state import *  # @UnusedWildImport
+from ibapi.tag_value import TagValue
+from ibapi.ticktype import *  # @UnusedWildImport
 from ibapi.utils import iswrapper
 
-# types
-from ibapi.common import * # @UnusedWildImport
-from ibapi.order_condition import * # @UnusedWildImport
-from ibapi.contract import * # @UnusedWildImport
-from ibapi.order import * # @UnusedWildImport
-from ibapi.order_state import * # @UnusedWildImport
-from ibapi.execution import Execution
-from ibapi.execution import ExecutionFilter
-from ibapi.commission_report import CommissionReport
-from ibapi.ticktype import * # @UnusedWildImport
-from ibapi.tag_value import TagValue
-
-from ibapi.account_summary_tags import *
-
-from ContractSamples import ContractSamples
 #from OrderSamples import OrderSamples
 #from AvailableAlgoParams import AvailableAlgoParams
 #from ScannerSubscriptionSamples import ScannerSubscriptionSamples
 #from FaAllocationSamples import FaAllocationSamples
 #from ibapi.scanner import ScanData
 
-#import Niveaux, Horaires
-import pandas as pd
 
-from bokeh.plotting import figure, show,  output_file, save
-from math import pi
-from bokeh.models.tickers import FixedTicker
-from bokeh.models import DatetimeTickFormatter
-from bokeh.models import DaysTicker, FuncTickFormatter, LinearAxis, Range1d
-from bokeh.io import export_png
 
 #DateStr = datetime.datetime.today().strftime("%Y-%m-%d")
 

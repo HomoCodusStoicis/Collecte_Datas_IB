@@ -8,7 +8,7 @@ import datetime
 
 HierStr = (datetime.datetime.today() + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")
 
-DateinDebStr="2022-09-22"
+DateinDebStr="2022-09-15"
 DateInFinStr = HierStr
 # DateInFinStr="2022-01-21"
 
@@ -452,7 +452,7 @@ class TestApp(TestWrapper, TestClient):
             self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
             print('===========3 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
             #print(self.Histo_ticks)
-            print('appel reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
+            print('appel   reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
             self.reqHistoricalTicks(reqId+1, self.contract, self.TsDebutStr, "", NbTicksDemandes, "TRADES", 0, True, []);
         else:
             print("fin reception flux de toutes les journées demandées pour tous les contrats...")
@@ -2366,7 +2366,7 @@ class TestApp(TestWrapper, TestClient):
         tsNow = datetime.datetime.today()
         
        
-        print(tsNow, 'historicalTicksLast, reqId:',reqId, "  - Size ticks rendus:",len(ticks))
+        #print(tsNow, 'historicalTicksLast, reqId:',reqId, "  - Size ticks rendus:",len(ticks))
         for tick in ticks:
             self.tsPrec_dt =  self.ts_dt
             self.ts_dt = datetime.datetime.fromtimestamp(tick.time)
@@ -2383,15 +2383,21 @@ class TestApp(TestWrapper, TestClient):
         # ts2 = self.ts_dt.strftime("%Y%m%d %H.%M.%S.%f")
         # FichierHistoTicksJourTs = self.FichierHistoTicksJour + ts2 + '.csv'
         # self.Histo_ticks.to_csv(FichierHistoTicksJourTs,sep=';',decimal='.',float_format='%.1f')
-        print(tsNow, "HistoricalTickLast. -------------------------------------------------------------", done)
+        if len(ticks) > 0 :
+            print(tsNow, 'Reponse historicalTicksLast, reqId:',reqId, "- done=", done, "  - Size ticks rendus:",len(ticks),
+                  "- 1er / dernier tick rendu:", datetime.datetime.fromtimestamp(ticks[0].time),
+                  "-", datetime.datetime.fromtimestamp(ticks[-1].time))
+        else:
+            print(tsNow, 'Reponse historicalTicksLast, reqId:',reqId, "- done=", done, "  - Size ticks rendus:",len(ticks))
 
-        if len(ticks) >= NbTicksDemandes and self.time_dernier_tick < self.ts_fin_du_jour:
+        if done and (len(ticks) >= NbTicksDemandes or len(ticks) == 0) and self.time_dernier_tick < self.ts_fin_du_jour:
             ts_next = (self.time_dernier_tick + datetime.timedelta(seconds=1)).strftime("%Y%m%d %H:%M:%S")
-            print(tsNow, " TS Next:", ts_next)
+            #print(tsNow, " TS Next:", ts_next)
             self.reqHistoricalTicks(reqId+1, self.contract, ts_next, "", NbTicksDemandes, "TRADES", 0, True, []);
         else:
             if done == False:
-                print(tsNow, ' historicalTicksLast, reqId:',reqId, "  - Attente fin traitement requete")
+                #print(tsNow, ' historicalTicksLast, reqId:',reqId, "  - Attente fin traitement requete")
+                a=1
             else:
                 #Journée complete :
                 #☻self.time_dernier_tick = datetime.datetime.fromtimestamp(tick.time)
@@ -2426,9 +2432,9 @@ class TestApp(TestWrapper, TestClient):
                     self.nbTicks = 0
                     self.nbTrades = 0
                     self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
-                    print(tsNow, ' ===========1 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
+                    print("\n", tsNow, ' ===========1 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
                     #print(self.Histo_ticks)
-                    print(tsNow, ' appel reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
+                    print(tsNow, ' appel   reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
                     self.reqHistoricalTicks(reqId+1, self.contract, self.TsDebutStr, "", NbTicksDemandes, "TRADES", 0, True, []);
                 else:
                     print(tsNow, " fin reception flux de toutes les journées demandées pour ce contrat...")
@@ -2504,7 +2510,7 @@ class TestApp(TestWrapper, TestClient):
                             self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
                             print(tsNow, ' ===========2 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
                             #print(self.Histo_ticks)
-                            print(tsNow, ' appel reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
+                            print(tsNow, ' appel   reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
                             self.reqHistoricalTicks(reqId+1, self.contract, self.TsDebutStr, "", NbTicksDemandes, "TRADES", 0, True, []);
                         else:
                             print(tsNow, " fin reception flux de toutes les journées demandées pour ce contrat...")

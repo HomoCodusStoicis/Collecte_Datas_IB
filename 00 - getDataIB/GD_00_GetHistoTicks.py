@@ -306,6 +306,8 @@ class TestApp(TestWrapper, TestClient):
         self.nbTicks  = 0
         self.nbTrades = 0
         self.time_dernier_tick = None
+        self.ts_next = TsDebutStr
+        self.nbTicksPrec = 2
 
         # Paramètres ajustables
         self.stop_loss_S1   = 15
@@ -853,7 +855,7 @@ class TestApp(TestWrapper, TestClient):
         elif NomContrat=="DOW-mini":
             contract.symbol = "YM"
             contract.secType = "FUT"
-            contract.exchange = "CBOT"
+            contract.exchange = "ECBOT"
             contract.currency = "USD"
             contract.lastTradeDateOrContractMonth = EcheanceContrat
             contract.multiplier = "5"
@@ -2365,6 +2367,7 @@ class TestApp(TestWrapper, TestClient):
                             done: bool):
         tsNow = datetime.datetime.today()
         
+        
        
         #print(tsNow, 'historicalTicksLast, reqId:',reqId, "  - Size ticks rendus:",len(ticks))
         for tick in ticks:
@@ -2379,6 +2382,11 @@ class TestApp(TestWrapper, TestClient):
             self.Histo_ticks.loc[self.nbTrades]=[self.ts_dt, tick.price, tick.size, self.nbTicks]
             self.time_dernier_tick = datetime.datetime.fromtimestamp(tick.time)
         
+        TickVideConfirmed = False
+        if done and len(ticks) == 0 and self.nbTicksPrec == 0:
+            TickVideConfirmed = True
+        self.nbTicksPrec = len(ticks)
+        
         # print(self.Histo_ticks)
         # ts2 = self.ts_dt.strftime("%Y%m%d %H.%M.%S.%f")
         # FichierHistoTicksJourTs = self.FichierHistoTicksJour + ts2 + '.csv'
@@ -2390,10 +2398,18 @@ class TestApp(TestWrapper, TestClient):
         else:
             print(tsNow, 'Reponse historicalTicksLast, reqId:',reqId, "- done=", done, "  - Size ticks rendus:",len(ticks))
 
-        if done and (len(ticks) >= NbTicksDemandes or len(ticks) == 0) and self.time_dernier_tick < self.ts_fin_du_jour:
-            ts_next = (self.time_dernier_tick + datetime.timedelta(seconds=1)).strftime("%Y%m%d %H:%M:%S")
+        ts_next_dt = datetime.datetime.strptime(self.ts_next, '%Y%m%d %H:%M:%S') 
+        
+
+        if done and len(ticks) == 0 and self.time_dernier_tick < self.ts_fin_du_jour and not TickVideConfirmed:
+            self.ts_next = (max(ts_next_dt, self.time_dernier_tick) + datetime.timedelta(seconds=1)).strftime("%Y%m%d %H:%M:%S")
             #print(tsNow, " TS Next:", ts_next)
-            self.reqHistoricalTicks(reqId+1, self.contract, ts_next, "", NbTicksDemandes, "TRADES", 0, True, []);
+            self.reqHistoricalTicks(reqId+1, self.contract, self.ts_next, "", NbTicksDemandes, "TRADES", 0, True, []);
+        
+        elif done and (len(ticks) >= NbTicksDemandes) and self.time_dernier_tick < self.ts_fin_du_jour:
+            self.ts_next = (self.time_dernier_tick + datetime.timedelta(seconds=1)).strftime("%Y%m%d %H:%M:%S")
+            #print(tsNow, " TS Next:", ts_next)
+            self.reqHistoricalTicks(reqId+1, self.contract, self.ts_next, "", NbTicksDemandes, "TRADES", 0, True, []);
         else:
             if done == False:
                 #print(tsNow, ' historicalTicksLast, reqId:',reqId, "  - Attente fin traitement requete")

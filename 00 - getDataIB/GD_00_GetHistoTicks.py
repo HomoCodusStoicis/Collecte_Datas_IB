@@ -2401,11 +2401,10 @@ class TestApp(TestWrapper, TestClient):
         ts_next_dt = datetime.datetime.strptime(self.ts_next, '%Y%m%d %H:%M:%S') 
         
 
-        if done and len(ticks) == 0 and not TickVideConfirmed :
-            if self.time_dernier_tick < self.ts_fin_du_jour :
-                self.ts_next = (max(ts_next_dt, self.time_dernier_tick) + datetime.timedelta(seconds=1)).strftime("%Y%m%d %H:%M:%S")
-                #print(tsNow, " TS Next:", ts_next)
-                self.reqHistoricalTicks(reqId+1, self.contract, self.ts_next, "", NbTicksDemandes, "TRADES", 0, True, []);
+        if done and len(ticks) == 0 and not TickVideConfirmed and self.time_dernier_tick < self.ts_fin_du_jour :
+            self.ts_next = (max(ts_next_dt, self.time_dernier_tick) + datetime.timedelta(seconds=1)).strftime("%Y%m%d %H:%M:%S")
+            #print(tsNow, " TS Next:", ts_next)
+            self.reqHistoricalTicks(reqId+1, self.contract, self.ts_next, "", NbTicksDemandes, "TRADES", 0, True, []);
         
         elif done and (len(ticks) >= NbTicksDemandes) and self.time_dernier_tick < self.ts_fin_du_jour:
             self.ts_next = (self.time_dernier_tick + datetime.timedelta(seconds=1)).strftime("%Y%m%d %H:%M:%S")

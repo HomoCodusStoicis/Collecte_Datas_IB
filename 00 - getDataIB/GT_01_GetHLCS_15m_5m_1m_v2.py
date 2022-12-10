@@ -15,7 +15,7 @@
 import datetime
 HierStr = (datetime.datetime.today() + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")
 
-DateInDebStr="2022-11-05 00:00:00"
+DateInDebStr="2022-12-02 00:00:00"
 
 DateInFinStr = HierStr + " 23:59:59"
 #DateInFinStr = "2022-03-19 03:59:59"
@@ -247,7 +247,7 @@ class IBApi(EWrapper, EClient):
         elif NomContrat in ["YM", "DOW-mini"]:
             contract.symbol = "YM"
             contract.secType = "FUT"
-            contract.exchange = "ECBOT"
+            contract.exchange = "CBOT"
             contract.currency = "USD"
             contract.lastTradeDateOrContractMonth = EcheanceContrat
             contract.multiplier = "5"

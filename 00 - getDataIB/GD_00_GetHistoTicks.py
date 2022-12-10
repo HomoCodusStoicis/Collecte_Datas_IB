@@ -2366,11 +2366,12 @@ class TestApp(TestWrapper, TestClient):
     def historicalTicksLast(self, reqId: int, ticks: ListOfHistoricalTickLast,
                             done: bool):
         tsNow = datetime.datetime.today()
-        
+        print(datetime.datetime.today(), 'Réponse historicalTicksLast,  reqId:',reqId)
         
        
         #print(tsNow, 'historicalTicksLast, reqId:',reqId, "  - Size ticks rendus:",len(ticks))
         for tick in ticks:
+                
             self.tsPrec_dt =  self.ts_dt
             self.ts_dt = datetime.datetime.fromtimestamp(tick.time)
             if self.nbTrades > 1 and self.ts_dt < self.tsPrec_dt :
@@ -2392,11 +2393,11 @@ class TestApp(TestWrapper, TestClient):
         # FichierHistoTicksJourTs = self.FichierHistoTicksJour + ts2 + '.csv'
         # self.Histo_ticks.to_csv(FichierHistoTicksJourTs,sep=';',decimal='.',float_format='%.1f')
         if len(ticks) > 0 :
-            print(tsNow, 'Reponse historicalTicksLast, reqId:',reqId, "- done=", done, "  - Size ticks rendus:",len(ticks),
+            print(datetime.datetime.today(), 'Reponse historicalTicksLast, reqId:',reqId, "- done=", done, "  - Size ticks rendus:",len(ticks),
                   "- 1er / dernier tick rendu:", datetime.datetime.fromtimestamp(ticks[0].time),
                   "-", datetime.datetime.fromtimestamp(ticks[-1].time))
         else:
-            print(tsNow, 'Reponse historicalTicksLast, reqId:',reqId, "- done=", done, "  - Size ticks rendus:",len(ticks))
+            print(datetime.datetime.today(), 'Reponse historicalTicksLast, reqId:',reqId, "- done=", done, "  - Size ticks rendus:",len(ticks))
 
         ts_next_dt = datetime.datetime.strptime(self.ts_next, '%Y%m%d %H:%M:%S') 
         
@@ -2417,7 +2418,7 @@ class TestApp(TestWrapper, TestClient):
             else:
                 #Journée complete :
                 #☻self.time_dernier_tick = datetime.datetime.fromtimestamp(tick.time)
-                print(tsNow, " Flux complet pour jour ", self.DateStr, " - Dernier tick du jour à ",self.time_dernier_tick)
+                print(datetime.datetime.today(), " Flux complet pour jour ", self.DateStr, " - Dernier tick du jour à ",self.time_dernier_tick)
                 self.Histo_ticks.to_csv(self.FichierHistoTicksJour,sep=';',decimal='.',float_format='%.1f')
     
                 
@@ -2439,7 +2440,7 @@ class TestApp(TestWrapper, TestClient):
                     #Si fichier déjà existant, on passe à la journée suivante :
                     try:
                         with open(self.FichierHistoTicksJour): 
-                            print(tsNow, ' Journée déjà traitée:', self.DateStr)
+                            print(datetime.datetime.today(), ' Journée déjà traitée:', self.DateStr)
                             JourneeDejaTraiteePourCeContrat = True
                     except IOError:
                             JourneeDejaTraiteePourCeContrat = False
@@ -2448,12 +2449,12 @@ class TestApp(TestWrapper, TestClient):
                     self.nbTicks = 0
                     self.nbTrades = 0
                     self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
-                    print("\n", tsNow, ' ===========1 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
+                    print("\n", datetime.datetime.today(), ' ===========1 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
                     #print(self.Histo_ticks)
-                    print(tsNow, ' appel   reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
+                    print(datetime.datetime.today(), ' appel   reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
                     self.reqHistoricalTicks(reqId+1, self.contract, self.TsDebutStr, "", NbTicksDemandes, "TRADES", 0, True, []);
                 else:
-                    print(tsNow, " fin reception flux de toutes les journées demandées pour ce contrat...")
+                    print(datetime.datetime.today(), " fin reception flux de toutes les journées demandées pour ce contrat...")
     
                     
                     #Passage au contrat suivant si pas tous déjà faits :
@@ -2462,9 +2463,9 @@ class TestApp(TestWrapper, TestClient):
                         self.contrat_courant = self.contrat_courant + 1
                         Future_NomContrat=ListeContrats[self.contrat_courant][0]
                         Future_EcheanceContrat=ListeContrats[self.contrat_courant][1]
-                        print(tsNow, " ----------------------")
-                        print(tsNow, " Contrat suivant : " + Future_NomContrat + "- Ech"+ Future_EcheanceContrat)
-                        print(tsNow, " ----------------------")
+                        print(datetime.datetime.today(), " ----------------------")
+                        print(datetime.datetime.today(), " Contrat suivant : " + Future_NomContrat + "- Ech"+ Future_EcheanceContrat)
+                        print(datetime.datetime.today(), " ----------------------")
                         self.contract = self.create_contract(Future_NomContrat, Future_EcheanceContrat)  # Create a contract
      
                         
@@ -2497,7 +2498,7 @@ class TestApp(TestWrapper, TestClient):
                         #Si fichier déjà existant, on passe à la journée suivante :
                         try:
                             with open(self.FichierHistoTicksJour): 
-                                print(tsNow, " Journée déjà traitée:", self.DateStr)
+                                print(datetime.datetime.today(), " Journée déjà traitée:", self.DateStr)
                                 JourneeDejaTraiteePourCeContrat = True
                         except IOError:
                                 JourneeDejaTraiteePourCeContrat = False
@@ -2515,7 +2516,7 @@ class TestApp(TestWrapper, TestClient):
                             #Si fichier déjà existant, on passe à la journée suivante :
                             try:
                                 with open(self.FichierHistoTicksJour): 
-                                    print(tsNow, ' Journée déjà traitée:', self.DateStr)
+                                    print(datetime.datetime.today(), ' Journée déjà traitée:', self.DateStr)
                                     JourneeDejaTraiteePourCeContrat = True
                             except IOError:
                                     JourneeDejaTraiteePourCeContrat = False
@@ -2524,17 +2525,17 @@ class TestApp(TestWrapper, TestClient):
                             self.nbTicks = 0
                             self.nbTrades = 0
                             self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
-                            print(tsNow, ' ===========2 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
+                            print(datetime.datetime.today(), ' ===========2 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
                             #print(self.Histo_ticks)
-                            print(tsNow, ' appel   reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
+                            print(datetime.datetime.today(), ' appel   reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
                             self.reqHistoricalTicks(reqId+1, self.contract, self.TsDebutStr, "", NbTicksDemandes, "TRADES", 0, True, []);
                         else:
-                            print(tsNow, " fin reception flux de toutes les journées demandées pour ce contrat...")
+                            print(datetime.datetime.today(), " fin reception flux de toutes les journées demandées pour ce contrat...")
     
                             
                         
                      
-                    print(tsNow, " fin traitement de tous les contrats..")
+                    print(datetime.datetime.today(), " fin traitement de tous les contrats..")
                     #self.stop()
                 
             

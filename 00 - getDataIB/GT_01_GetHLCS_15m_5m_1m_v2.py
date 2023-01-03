@@ -15,7 +15,7 @@
 import datetime
 HierStr = (datetime.datetime.today() + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")
 
-DateInDebStr="2022-12-02 00:00:00"
+DateInDebStr="2022-12-24 00:00:00"
 
 DateInFinStr = HierStr + " 23:59:59"
 #DateInFinStr = "2022-03-19 03:59:59"
@@ -29,9 +29,9 @@ import datetime
 
 repOut = 'Y:\\TRAVAIL\\Mes documents\\Bourse\\Data\\Data API IB\\01 - Histo Bars Minutes'
 
-ListeContratsIn = [["NASDAQ-mini",["202212","202303"]],
-                   ["DOW-mini"   ,["202212","202303"]],
-                   ["DAX-mini"   ,["202212","202303"]]
+ListeContratsIn = [["NASDAQ-mini",["202303","202306"]],
+                   ["DOW-mini"   ,["202303","202306"]],
+                   ["DAX-mini"   ,["202303","202306"]]
                  ]
 
 

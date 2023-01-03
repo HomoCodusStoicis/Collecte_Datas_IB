@@ -27,9 +27,9 @@ portTWS=portSimu
 # donc dans ce cas, pour s'en sortir, il faut réduire la taile des paquets demandés, et réduire par exemple à 900 ticks
 NbTicksDemandes = 900
 
-ListeContratsIn = [["NASDAQ-mini",["202212","202303"]],
-                   ["DOW-mini"   ,["202212","202303"]],
-                   ["DAX-mini"   ,["202212","202303"]]
+ListeContratsIn = [["NASDAQ-mini",["202303","202306"]],
+                   ["DOW-mini"   ,["202303","202306"]],
+                   ["DAX-mini"   ,["202303","202306"]]
                  ]
 
 ListeContrats = []

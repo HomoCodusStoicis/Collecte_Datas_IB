@@ -8,7 +8,7 @@ import datetime
 
 HierStr = (datetime.datetime.today() + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")
 
-DateinDebStr="2022-09-15"
+DateinDebStr="2022-12-30"
 DateInFinStr = HierStr
 # DateInFinStr="2022-01-21"
 
@@ -293,8 +293,9 @@ class TestApp(TestWrapper, TestClient):
         self.NbPeriodesDebitOK = 0
 
         # Variables pour BilanDuJour
-        self.Histo_ticks = pd.DataFrame(columns=['NumTrade','ts','Prix','NbLots','CumulNbLots'])
-        self.Histo_ticks.set_index("NumTrade", inplace=True)
+        self.List_Histo_Ticks = []
+        #self.Histo_ticks = pd.DataFrame(columns=['NumTrade','ts','Prix','NbLots','CumulNbLots'])
+        #self.Histo_ticks.set_index("NumTrade", inplace=True)
         self.nbTicks  = 0
         self.nbTrades = 0
         self.time_dernier_tick = None
@@ -410,7 +411,7 @@ class TestApp(TestWrapper, TestClient):
  
             self.nbTicks = 0
             self.nbTrades = 0
-            self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
+            #self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
             print('===========4 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
             #print(self.Histo_ticks)
 
@@ -443,7 +444,7 @@ class TestApp(TestWrapper, TestClient):
         if JourneeDejaTraiteePourCeContrat == False:
             self.nbTicks = 0
             self.nbTrades = 0
-            self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
+            #self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
             print('===========3 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
             #print(self.Histo_ticks)
             print('appel   reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
@@ -556,32 +557,21 @@ class TestApp(TestWrapper, TestClient):
     def historicalTicksLast(self, reqId: int, ticks: ListOfHistoricalTickLast,
                             done: bool):
         tsNow = datetime.datetime.today()
-        print(datetime.datetime.today(), 'Réponse historicalTicksLast,  reqId:',reqId)
+        #print(datetime.datetime.today(), 'Réponse historicalTicksLast,  reqId:',reqId)
         
+        
+        if len(ticks) > 0:
+            # Concaténation à la liste globale de cette requete (contrat / echeance / date) :
+            self.List_Histo_Ticks = self.List_Histo_Ticks + ticks
+            
+            #Affectation de qq variables pour la suite la liste de ticks en cours :
+            self.time_dernier_tick = datetime.datetime.fromtimestamp(ticks[-1].time)
        
-        #print(tsNow, 'historicalTicksLast, reqId:',reqId, "  - Size ticks rendus:",len(ticks))
-        for tick in ticks:
-                
-            self.tsPrec_dt =  self.ts_dt
-            self.ts_dt = datetime.datetime.fromtimestamp(tick.time)
-            if self.nbTrades > 1 and self.ts_dt < self.tsPrec_dt :
-                print("Arrivée tick non triée, tsPrec:", self.tsPrec_dt,"ts:", self.ts_dt)
-            ts = self.ts_dt.strftime("%Y%m%d %H:%M:%S.%f")
-            self.nbTicks=self.nbTicks + tick.size 
-            self.nbTrades = self.nbTrades + 1
-            #print("HistoricalTickLast. ReqId:", reqId, ts,"numTrade:",self.nbTrades, tick)
-            self.Histo_ticks.loc[self.nbTrades]=[self.ts_dt, tick.price, tick.size, self.nbTicks]
-            self.time_dernier_tick = datetime.datetime.fromtimestamp(tick.time)
-        
         TickVideConfirmed = False
         if done and len(ticks) == 0 and self.nbTicksPrec == 0:
             TickVideConfirmed = True
         self.nbTicksPrec = len(ticks)
         
-        # print(self.Histo_ticks)
-        # ts2 = self.ts_dt.strftime("%Y%m%d %H.%M.%S.%f")
-        # FichierHistoTicksJourTs = self.FichierHistoTicksJour + ts2 + '.csv'
-        # self.Histo_ticks.to_csv(FichierHistoTicksJourTs,sep=';',decimal='.',float_format='%.1f')
         if len(ticks) > 0 :
             print(datetime.datetime.today(), 'Reponse historicalTicksLast, reqId:',reqId, "- done=", done, "  - Size ticks rendus:",len(ticks),
                   "- 1er / dernier tick rendu:", datetime.datetime.fromtimestamp(ticks[0].time),
@@ -609,7 +599,26 @@ class TestApp(TestWrapper, TestClient):
                 #Journée complete :
                 #☻self.time_dernier_tick = datetime.datetime.fromtimestamp(tick.time)
                 print(datetime.datetime.today(), " Flux complet pour jour ", self.DateStr, " - Dernier tick du jour à ",self.time_dernier_tick)
-                self.Histo_ticks.to_csv(self.FichierHistoTicksJour,sep=';',decimal='.',float_format='%.1f')
+                
+                # Conversion et formattage de la liste vers un dataframe :
+                df_Histo_ticks = pd.DataFrame(self.List_Histo_Ticks, columns = ['Ticks'])
+                df_Histo_ticks['ts']           = df_Histo_ticks['Ticks'].apply(lambda x:datetime.datetime.fromtimestamp(x.time))
+                df_Histo_ticks['Prix']         = df_Histo_ticks['Ticks'].apply(lambda x:x.price)
+                df_Histo_ticks['NbLots']       = df_Histo_ticks['Ticks'].apply(lambda x:x.size)
+                
+                if df_Histo_ticks.iloc[0]['ts'] > df_Histo_ticks.iloc[-1]['ts'] :
+                    print(datetime.datetime.today(), " Tri du dataframe avant écriture fichier...")
+                    df_Histo_ticks.sort_values(by=['ts'],inplace=True)
+                    df_Histo_ticks.reset_index(inplace = True)
+                
+                df_Histo_ticks['CumulNbLots']  = df_Histo_ticks['NbLots'].cumsum()
+                df_Histo_ticks['NumTrade']     = df_Histo_ticks.index + 1
+                df_Histo_ticks                 = df_Histo_ticks[['NumTrade','ts','Prix','NbLots','CumulNbLots']]
+
+                df_Histo_ticks.to_csv(self.FichierHistoTicksJour,sep=';',decimal='.',float_format='%.1f',index=False)
+                
+                #Réinit de la liste des ticks :
+                self.List_Histo_Ticks = []
     
                 
                 #Recherche Journée pas déjà traitée, passage au lendemain:
@@ -638,7 +647,7 @@ class TestApp(TestWrapper, TestClient):
                 if JourneeDejaTraiteePourCeContrat == False:
                     self.nbTicks = 0
                     self.nbTrades = 0
-                    self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
+                    #self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
                     print("\n", datetime.datetime.today(), ' ===========1 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
                     #print(self.Histo_ticks)
                     print(datetime.datetime.today(), ' appel   reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)
@@ -681,7 +690,7 @@ class TestApp(TestWrapper, TestClient):
          
                         self.nbTicks = 0
                         self.nbTrades = 0
-                        self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
+                        #self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
                         #print('=========== ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
                         #print(self.Histo_ticks)
     
@@ -714,7 +723,7 @@ class TestApp(TestWrapper, TestClient):
                         if JourneeDejaTraiteePourCeContrat == False:
                             self.nbTicks = 0
                             self.nbTrades = 0
-                            self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
+                            #self.Histo_ticks = self.Histo_ticks.drop(self.Histo_ticks.index)
                             print(datetime.datetime.today(), ' ===========2 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
                             #print(self.Histo_ticks)
                             print(datetime.datetime.today(), ' appel   reqHistoricalTicks, reqId:',reqId+1, self.TsDebutStr)

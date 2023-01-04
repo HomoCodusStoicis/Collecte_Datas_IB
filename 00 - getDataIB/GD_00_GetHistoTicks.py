@@ -605,7 +605,11 @@ class TestApp(TestWrapper, TestClient):
                 df_Histo_ticks['ts']           = df_Histo_ticks['Ticks'].apply(lambda x:datetime.datetime.fromtimestamp(x.time))
                 df_Histo_ticks['Prix']         = df_Histo_ticks['Ticks'].apply(lambda x:x.price)
                 df_Histo_ticks['NbLots']       = df_Histo_ticks['Ticks'].apply(lambda x:x.size)
+                df_Histo_ticks['Date']         = df_Histo_ticks['ts'].apply(lambda x:x.strftime("%Y%m%d"))
                 
+                # Filtre pour s'assurer de n'avoir des données que pour la date demandée :
+                F_date = (df_Histo_ticks['Date'] == self.ts_fin_du_jour.strftime("%Y%m%d"))
+               
                 if df_Histo_ticks.iloc[0]['ts'] > df_Histo_ticks.iloc[-1]['ts'] :
                     print(datetime.datetime.today(), " Tri du dataframe avant écriture fichier...")
                     df_Histo_ticks.sort_values(by=['ts'],inplace=True)
@@ -613,9 +617,8 @@ class TestApp(TestWrapper, TestClient):
                 
                 df_Histo_ticks['CumulNbLots']  = df_Histo_ticks['NbLots'].cumsum()
                 df_Histo_ticks['NumTrade']     = df_Histo_ticks.index + 1
-                df_Histo_ticks                 = df_Histo_ticks[['NumTrade','ts','Prix','NbLots','CumulNbLots']]
 
-                df_Histo_ticks.to_csv(self.FichierHistoTicksJour,sep=';',decimal='.',float_format='%.1f',index=False)
+                df_Histo_ticks.loc[F_date,['NumTrade','ts','Prix','NbLots','CumulNbLots']].to_csv(self.FichierHistoTicksJour,sep=';',decimal='.',float_format='%.1f',index=False)
                 
                 #Réinit de la liste des ticks :
                 self.List_Histo_Ticks = []

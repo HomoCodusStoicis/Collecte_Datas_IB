@@ -319,6 +319,8 @@ class IBApi(TestWrapper, TestClient):
     def connectAck(self):
         if self.asynchronous:
             self.startApi()
+            
+        self.start()
 
     # ! [connectack]
 
@@ -332,8 +334,7 @@ class IBApi(TestWrapper, TestClient):
         self.nextValidOrderId = orderId
     # ! [nextvalidid]
 
-        # we can start now
-        self.start()
+
 
 
 
@@ -453,8 +454,8 @@ class IBApi(TestWrapper, TestClient):
 
         #on ne stocke la bougie que si celle-ci est cloturée : si la période est terminée
         updateToDo= True
-        F=(bot.cpt['reqId'] == reqId)
-        PeriodeReq = bot.cpt.loc[F,'Periode'].values[0]
+
+        PeriodeReq = self.periode
         if PeriodeReq != '1D' :
             ts_cour = datetime.datetime.today()
             delta_time = ts_cour - datetime.datetime.strptime(bar.date, '%Y%m%d %H:%M:%S')
@@ -558,28 +559,26 @@ class Bot():
         self.fin_flux = None
     
     
+    def start(self):
+        
         try:
             self.ib = IBApi()
             self.ib.connect("127.0.0.1", portTWS, clientId=0)
             logging.error("serverVersion:%s connectionTime:%s" % (self.ib.serverVersion(), self.ib.twsConnectionTime()))
             self.ib.run()
+
             
             
         except:
             raise
 
-        finally:
-            self.ib.dumpTestCoverageSituation()
-            self.ib.dumpReqAnsErrSituation()            
+        #finally:
+        #    self.ib.dumpTestCoverageSituation()
+        #    self.ib.dumpReqAnsErrSituation()            
 
         
    
-        
-    def run_loop(self):
-        print(datetime.datetime.today(), threading.current_thread().name ,"run_loop avant")
-        self.ib.run()       
-        print(datetime.datetime.today(), threading.current_thread().name ,"run_loop après") 
-
+    
     def Determine_Et_Appelle_Requete_Suivante(self,TimeUnit):
         print(datetime.datetime.today(), threading.current_thread().name ,"Determine_Et_Appelle_Requete_Suivante") 
                     
@@ -828,5 +827,7 @@ class Bot():
 
 
 bot = Bot()
+bot.start()
+
 
 

@@ -145,7 +145,7 @@ def SetupLogger():
 class IBApi(EWrapper, EClient):
 
     def __init__(self):
-        print(datetime.datetime.today(),"__init__")
+        print(datetime.datetime.today(), threading.current_thread().name ,"__init__")
         #TestWrapper.__init__(self)
         EClient.__init__(self, wrapper=self)
         # ! [socket_init]
@@ -209,7 +209,7 @@ class IBApi(EWrapper, EClient):
         self.DureeVieOrdreParent_Ticks = 1000 #si l'ordre positionné il y a 1000 ticks n'a toujours pas été activé, c'est probablement qu'on est en train de ranger juste en dessous, c'est dangereux, on risque le breakOut
         self.FrequenceVerificationSituationRange = 50 # verif tous les 50 ticks    
         
-        print(datetime.datetime.today(),"__init__", self.started)
+        print(datetime.datetime.today(), threading.current_thread().name ,"__init__", self.started)
 
 
     def dumpTestCoverageSituation(self):
@@ -252,7 +252,7 @@ class IBApi(EWrapper, EClient):
 
 
     def start(self):
-        print(datetime.datetime.today(),"start", self.started)
+        print(datetime.datetime.today(), threading.current_thread().name ,"start", self.started)
 
         if self.started:
             return
@@ -260,9 +260,9 @@ class IBApi(EWrapper, EClient):
         self.started = True
 
         num_contrat_courant=0
-        self.fin_flux = 0
-        self.ListeContrats   = ListeContrats
-        self.contrat_courant=-1
+        bot.fin_flux = 0
+        bot.ListeContrats   = ListeContrats
+        bot.contrat_courant=-1
         # JourneeDejaTraiteePourCeContrat = True
 
         ##############################################
@@ -277,16 +277,16 @@ class IBApi(EWrapper, EClient):
         print("===================================================")
 
         reqId = 18000
-        self.contrat_courant=0
+        bot.contrat_courant=0
         
-        Future_NomContrat=self.ListeContrats[self.contrat_courant][0]
-        Future_EcheanceContrat=self.ListeContrats[self.contrat_courant][1]
+        Future_NomContrat      = bot.ListeContrats[bot.contrat_courant][0]
+        Future_EcheanceContrat = bot.ListeContrats[bot.contrat_courant][1]
         print("")
         print("----------------------")
         print("Start - Contrat suivant : " + Future_NomContrat + "- Ech"+ Future_EcheanceContrat)
         print("----------------------")
         
-        self.Determine_Et_Appelle_Requete_Suivante("15min")
+        bot.Determine_Et_Appelle_Requete_Suivante("15min")
         
         #Trt_Une_Time_Unit("5min")
         
@@ -294,7 +294,7 @@ class IBApi(EWrapper, EClient):
         ##############################################
 
        
-        print(datetime.datetime.today(),"Executing requests ... finished")
+        print(datetime.datetime.today(), threading.current_thread().name,"Executing requests ... finished")
 
     def increment_id(self):
         """ Increments the request id"""
@@ -428,7 +428,7 @@ class Bot():
                                     dest="global_cancel", default=False,
                                     help="whether to trigger a globalCancel req")
         args = cmdLineParser.parse_args()
-        print(datetime.datetime.today(),"Using args", args)
+        print(datetime.datetime.today(),threading.current_thread().name,"Using args", args)
         logging.debug("Using args %s", args)
         # print(args)
     
@@ -471,40 +471,30 @@ class Bot():
     
     
         try:
-
-               
             self.ib = IBApi()
-    
             self.ib.connect("127.0.0.1", portTWS, clientId=0)
-     
-            logging.error("serverVersion:%s connectionTime:%s" % (self.ib.serverVersion(),
-                                                          self.ib.twsConnectionTime()))
-
-                
-            logging.error("Avant creation thread...")
-            ib_thread = threading.Thread(target=self.run_loop, daemon=True)
-            logging.error("Après creation thread...")
-            ib_thread.start()
-            logging.error("Après start thread...")
+            logging.error("serverVersion:%s connectionTime:%s" % (self.ib.serverVersion(), self.ib.twsConnectionTime()))
+            self.ib.run()
             
-            # Start algo :
-            logging.error("Dans start...")
-
             
         except:
             raise
 
-            
-        logging.error("Après lancement thread ib...")
+        finally:
+            self.ib.dumpTestCoverageSituation()
+            self.ib.dumpReqAnsErrSituation()            
+
         
    
         
     def run_loop(self):
-        print(datetime.datetime.today(),"run_loop")
-        self.ib.run()        
+        print(datetime.datetime.today(), threading.current_thread().name ,"run_loop avant")
+        self.ib.run()       
+        print(datetime.datetime.today(), threading.current_thread().name ,"run_loop après") 
 
     def Determine_Et_Appelle_Requete_Suivante(self,TimeUnit):
-            
+        print(datetime.datetime.today(), threading.current_thread().name ,"Determine_Et_Appelle_Requete_Suivante") 
+                    
         # TimeUnit : param d'entrée, valeur in {'15min','5min','1min'}
         
         #Recherche Journée pas déjà traitée, passage au lendemain:
@@ -697,7 +687,7 @@ class Bot():
         Contrat = self.contrat
         Periode = self.periode
         Echeance = self.echeance
-        print(ts, " ecrire_fichier, reqId:", reqId, DateD, Contrat, Periode)
+        print(ts, threading.current_thread().name," ecrire_fichier, reqId:", reqId, DateD, Contrat, Periode)
 
         DateStr = DateD.strftime('%Y-%m-%d')
         dos = '\\HistoBars_' + Contrat + '-Ech' + Echeance 
@@ -743,10 +733,12 @@ class Bot():
         
         ts = datetime.datetime.today()         
         self.fin_flux = self.fin_flux+1
-        print(ts, "bot.fin_flux:", self.fin_flux, '/', "Requête ", reqId)
+        print(ts, threading.current_thread().name, "bot.fin_flux:", self.fin_flux, '/', "Requête ", reqId)
 
         DateFinD = datetime.datetime.strptime(self.TsFinStr, '%Y-%m-%d  %H:%M:%S').date()
         self.ecrire_fichier(reqId, DateFinD)
 
 
 bot = Bot()
+
+

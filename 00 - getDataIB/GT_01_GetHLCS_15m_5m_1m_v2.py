@@ -242,7 +242,7 @@ class IBApi(TestWrapper, TestClient):
         self.globalCancelOnly = False
         self.simplePlaceOid = None
         self.reqID=0
-        self.contract=None
+        #self.contract=None
         self.echeance=None
         self.periode=None
         self.DateDebDt = DateInDebDt
@@ -321,6 +321,8 @@ class IBApi(TestWrapper, TestClient):
             self.startApi()
             
         self.start()
+            
+        
 
     # ! [connectack]
 
@@ -349,13 +351,20 @@ class IBApi(TestWrapper, TestClient):
         num_contrat_courant=0
         bot.fin_flux = 0
         bot.ListeContrats   = ListeContrats
-        bot.contrat_courant=-1
+        #bot.contrat_courant=-1
         # JourneeDejaTraiteePourCeContrat = True
 
         ##############################################
         # Nouveau CODE
         ##############################################
+        # A remplacer par catch evt connexion OK
+        print("wait 2s")
+        tm.sleep(2)
         
+        print("==> Liste des contrats à traiter :")
+        print(bot.ListeContrats)
+        print("==> Date début collecte :", DateInDebStr)
+        print("==> Date fin   collecte :", DateInFinStr)
         print("")
         print("===================================================")
         print("===================================================")
@@ -479,7 +488,7 @@ class IBApi(TestWrapper, TestClient):
     # ! [historicaldataend]
     def historicalDataEnd(self, reqId: int, start: str, end: str):
         super().historicalDataEnd(reqId, start, end)
-        print(datetime.datetime.today(),threading.current_thread().name , "Fin réception flux - HistoricalDataEnd - ReqId:", reqId, "from", start, "to", end)
+        #print(datetime.datetime.today(),threading.current_thread().name , "Fin réception flux - HistoricalDataEnd - ReqId:", reqId, "from", start, "to", end)
         
         bot.on_historicalDataEnd(reqId)
    
@@ -559,12 +568,12 @@ class Bot():
         self.fin_flux = None
     
     
-    def start(self):
+    def startBot(self):
         
         try:
             self.ib = IBApi()
             self.ib.connect("127.0.0.1", portTWS, clientId=0)
-            logging.error("serverVersion:%s connectionTime:%s" % (self.ib.serverVersion(), self.ib.twsConnectionTime()))
+            print("serverVersion:%s connectionTime:%s" % (self.ib.serverVersion(), self.ib.twsConnectionTime()))
             self.ib.run()
 
             
@@ -580,27 +589,27 @@ class Bot():
    
     
     def Determine_Et_Appelle_Requete_Suivante(self,TimeUnit):
-        print(datetime.datetime.today(), threading.current_thread().name ,"Determine_Et_Appelle_Requete_Suivante") 
+        print(datetime.datetime.today(), threading.current_thread().name ,"Determine_Et_Appelle_Requete_Suivante ", TimeUnit) 
                     
         # TimeUnit : param d'entrée, valeur in {'15min','5min','1min'}
         
         #Recherche Journée pas déjà traitée, passage au lendemain:
         JourneeDejaTraiteePourCeContrat = True
-        while JourneeDejaTraiteePourCeContrat == True and self.DateCourDt < self.DateFinDt:
-                
-            self.DateCourDt = self.DateCourDt + datetime.timedelta(days=1)
-            self.DateStr = self.DateCourDt.strftime('%Y-%m-%d')
-            Future_NomContrat=ListeContrats[self.contrat_courant][0]
-            Future_EcheanceContrat=ListeContrats[self.contrat_courant][1]
-            self.contract = self.ib.create_contract(Future_NomContrat, Future_EcheanceContrat)  # Create a contract
+        while JourneeDejaTraiteePourCeContrat == True and self.DateCourDt.strftime('%Y%m%d') < self.DateFinDt.strftime('%Y%m%d'):
             
-            repertoire = repOut     + '\\HistoBars_'            + Future_NomContrat + "-Ech"+ Future_EcheanceContrat
-            path       = repertoire + '\\HistoBars-' + TimeUnit + Future_NomContrat + "-Ech"+ Future_EcheanceContrat + "_Q"
+            self.DateCourDt        = self.DateCourDt + datetime.timedelta(days=1)
+            self.DateStr           = self.DateCourDt.strftime('%Y-%m-%d')
+            Future_NomContrat      = self.ListeContrats[self.contrat_courant][0]
+            Future_EcheanceContrat = self.ListeContrats[self.contrat_courant][1]
+            self.ib.contract = self.ib.create_contract(Future_NomContrat, Future_EcheanceContrat)  # Create a contract
+            
+            repertoire = repOut     + '\\HistoBars_'                  + Future_NomContrat + "-Ech"+ Future_EcheanceContrat
+            path       = repertoire + '\\HistoBars-' + TimeUnit + "-" + Future_NomContrat + "-Ech"+ Future_EcheanceContrat + "-Q"
             ficOut     = path + self.DateStr + '.csv'
             
             #self.FichierHistoTicksJour    =   path + self.DateStr + '.csv'
-            self.TsDebutStr = self.DateStr[0:4] + self.DateStr[5:7] + self.DateStr[8:10] + " 00:00:01"
-            self.TsFinStr   = self.DateStr[0:4] + self.DateStr[5:7] + self.DateStr[8:10] + " 22:05:00"
+            self.TsDebutStr = self.DateStr[0:4] + self.DateStr[5:7] + self.DateStr[8:10] + " 00:00:00"
+            self.TsFinStr   = self.DateStr[0:4] + self.DateStr[5:7] + self.DateStr[8:10] + " 23:59:59"
             self.ts_fin_du_jour = datetime.datetime.strptime(self.TsFinStr,  '%Y%m%d  %H:%M:%S')
 
             #Si fichier déjà existant, on passe à la journée suivante :
@@ -609,7 +618,11 @@ class Bot():
                     print(datetime.datetime.today(), ' Journée déjà traitée:', self.DateStr)
                     JourneeDejaTraiteePourCeContrat = True
             except IOError:
+                    print('Journée pas encore traitée:', self.DateStr)
                     JourneeDejaTraiteePourCeContrat = False
+
+            finally:
+                    print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)                    
 
         if JourneeDejaTraiteePourCeContrat == False:
             print('===========3 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
@@ -623,12 +636,13 @@ class Bot():
             BarSize = dic[TimeUnit]
             self.ib.increment_id()
             print(datetime.datetime.today(), "Appel requete reqHistoricalData " + BarSize + "..." + Future_NomContrat + ' - ' + Future_EcheanceContrat + 
-                    ' - Jour :', self.DateStr + " - IdReq = " + str(self.ib.reqID))
+                    ' - Jour :', DateFinStrQuery + " - IdReq = " + str(self.ib.reqID))
         
             self.contrat  = Future_NomContrat
             self.echeance = Future_EcheanceContrat
             self.periode  = TimeUnit 
-            self.ib.reqHistoricalData(self.ib.reqID, self.contract, DateFinStrQuery,'1 D', BarSize, "TRADES", 0, 1, False, [])
+            print("params:", self.ib.reqID, self.ib.contract, DateFinStrQuery, BarSize )
+            self.ib.reqHistoricalData(self.ib.reqID, self.ib.contract, DateFinStrQuery,'3 D', BarSize, "TRADES", 0, 1, False, [])
 
         else:
             print(datetime.datetime.today(), " fin reception flux de toutes les journées demandées pour ce contrat pour l'unité de temps " + TimeUnit + " ...")
@@ -637,23 +651,23 @@ class Bot():
             JourneeDejaTraiteePourCeContrat = True
             #Passage au contrat suivant si pas tous déjà faits :
             while JourneeDejaTraiteePourCeContrat == True and self.contrat_courant < len(self.ListeContrats) - 1:
-                self.contrat_courant = self.contrat_courant + 1
-                Future_NomContrat=self.ListeContrats[self.contrat_courant][0]
-                Future_EcheanceContrat=self.ListeContrats[self.contrat_courant][1]
+                self.contrat_courant   = self.contrat_courant + 1
+                Future_NomContrat      = self.ListeContrats[self.contrat_courant][0]
+                Future_EcheanceContrat = self.ListeContrats[self.contrat_courant][1]
                 print("----------------------")
                 print("Start - Contrat suivant : " + Future_NomContrat + "- Ech"+ Future_EcheanceContrat)
                 print("----------------------")
-                self.contract = self.create_contract(Future_NomContrat, Future_EcheanceContrat)  # Create a contract
+                self.ib.contract = self.ib.create_contract(Future_NomContrat, Future_EcheanceContrat)  # Create a contract
 
-                repertoire = repOut     + '\\HistoBars_'            + Future_NomContrat + "-Ech"+ Future_EcheanceContrat
-                path       = repertoire + '\\HistoBars-' + TimeUnit + Future_NomContrat + "-Ech"+ Future_EcheanceContrat + "_Q"
+                repertoire = repOut     + '\\HistoBars_'                  + Future_NomContrat + "-Ech"+ Future_EcheanceContrat
+                path       = repertoire + '\\HistoBars-' + TimeUnit + "-" + Future_NomContrat + "-Ech"+ Future_EcheanceContrat + "-Q"
 
                 if not os.path.exists(repertoire):
                     os.makedirs(repertoire)
 
-                self.DateStr    = DateStr
-                self.DateDebDt  = DateDebDt
-                self.DateFinDt  = DateFinDt
+                self.DateStr    = DateDebStr
+                self.DateDebDt  = DateInDebDt
+                self.DateFinDt  = DateInFinDt
                 
                 self.tsPrec_dt =  None
                 self.ts_dt =  None
@@ -674,25 +688,35 @@ class Bot():
                         print('Journée déjà traitée:', self.DateStr)
                         JourneeDejaTraiteePourCeContrat = True
                 except IOError:
+                        print('Journée pas encore traitée:', self.DateStr)
                         JourneeDejaTraiteePourCeContrat = False
+                finally:
+                        print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)
 
                 #Recherche Journée pas déjà traitée, passage au lendemain:
-                while JourneeDejaTraiteePourCeContrat == True and self.DateCourDt < self.DateFinDt:
+                while JourneeDejaTraiteePourCeContrat == True and self.DateCourDt.strftime('%Y%m%d') < self.DateFinDt.strftime('%Y%m%d') :
                         
                     self.DateCourDt = self.DateCourDt + datetime.timedelta(days=1)
-                    self.DateStr = self.DateCourDt.strftime('%Y-%m-%d')
-                    self.FichierHistoTicksJour    =   path + self.DateStr + '.csv'
+                    self.DateStr    = self.DateCourDt.strftime('%Y-%m-%d')
+                    ficOut          = path + self.DateStr + '.csv'
                     self.TsDebutStr = self.DateStr[0:4] + self.DateStr[5:7] + self.DateStr[8:10] + " 00:00:00"
                     self.TsFinStr   = self.DateStr[0:4] + self.DateStr[5:7] + self.DateStr[8:10] + " 23:59:59"
                     self.ts_fin_du_jour = datetime.datetime.strptime(self.TsFinStr,  '%Y%m%d  %H:%M:%S')
 
                     #Si fichier déjà existant, on passe à la journée suivante :
                     try:
-                        with open(self.FichierHistoTicksJour): 
+                        with open(ficOut): 
                             print('Journée déjà traitée:', self.DateStr)
                             JourneeDejaTraiteePourCeContrat = True
                     except IOError:
+                        print('Journée pas encore traitée:', self.DateStr)                        
                         JourneeDejaTraiteePourCeContrat = False
+
+                    finally:
+                            print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)
+                        
+                if JourneeDejaTraiteePourCeContrat:
+                    print(datetime.datetime.today(), " fin reception flux de toutes les journées demandées pour ce contrat pour l'unité de temps " + TimeUnit + " ...")
 
             if JourneeDejaTraiteePourCeContrat == False:
 
@@ -708,12 +732,13 @@ class Bot():
                 #print(datetime.datetime.today(),"BarSize:",BarSize)
                 self.ib.increment_id()
                 print(datetime.datetime.today(), "Appel requete reqHistoricalData " + BarSize + "..." + Future_NomContrat + ' - ' + Future_EcheanceContrat + 
-                        ' - Jour :', self.DateStr + " - IdReq = " + str(self.ib.reqID))
+                        ' - Jour :', DateFinStrQuery + " - IdReq = " + str(self.ib.reqID))
             
                 self.contrat  = Future_NomContrat
                 self.echeance = Future_EcheanceContrat
                 self.periode  = TimeUnit 
-                self.ib.reqHistoricalData(self.ib.reqID, self.ib.contract, DateFinStrQuery,'1 D', BarSize, "TRADES", 0, 1, False, [])
+                #print("params:", self.ib.reqID, self.ib.contract, DateFinStrQuery, BarSize )
+                self.ib.reqHistoricalData(self.ib.reqID, self.ib.contract, DateFinStrQuery,'3 D', BarSize, "TRADES", 0, 1, False, [])
 
             else:
                 print("fin reception flux de toutes les journées demandées pour tous les contrats pour l'unité de temps " + TimeUnit + "...")
@@ -725,7 +750,18 @@ class Bot():
                     print("Start - Traitement des flux en 5 min...")
                     print("===================================================")
                     print("===================================================")
+                    self.contrat_courant=0
+                    self.DateCourDt = DateInDebDt + datetime.timedelta(days=-1)
+                    Future_NomContrat      = bot.ListeContrats[bot.contrat_courant][0]
+                    Future_EcheanceContrat = bot.ListeContrats[bot.contrat_courant][1]
+
+                    print("")
+                    print("----------------------")
+                    print("Start - Contrat suivant : " + Future_NomContrat + "- Ech"+ Future_EcheanceContrat)
+                    print("----------------------")
+                            
                     self.Determine_Et_Appelle_Requete_Suivante('5min')
+                    
                 elif TimeUnit == '5min':
                     print("")
                     print("===================================================")
@@ -733,7 +769,18 @@ class Bot():
                     print("Start - Traitement des flux en 1 min...")
                     print("===================================================")
                     print("===================================================")                   
+                    self.contrat_courant=0
+                    self.DateCourDt = DateInDebDt + datetime.timedelta(days=-1)
+                    Future_NomContrat      = bot.ListeContrats[bot.contrat_courant][0]
+                    Future_EcheanceContrat = bot.ListeContrats[bot.contrat_courant][1]
+                    
+                    print("")
+                    print("----------------------")
+                    print("Start - Contrat suivant : " + Future_NomContrat + "- Ech"+ Future_EcheanceContrat)
+                    print("----------------------")
+
                     self.Determine_Et_Appelle_Requete_Suivante('1min')
+                    
                 else:
                     print("fin reception flux de toutes les journées demandées pour tous les contrats pour TOUTES les unités de temps...")
 
@@ -774,7 +821,7 @@ class Bot():
         Contrat = self.contrat
         Periode = self.periode
         Echeance = self.echeance
-        print(ts, threading.current_thread().name," ecrire_fichier, reqId:", reqId, DateD, Contrat, Periode)
+        #print(ts, threading.current_thread().name," ecrire_fichier, reqId:", reqId, DateD, Contrat, Periode)
 
         DateStr = DateD.strftime('%Y-%m-%d')
         dos = '\\HistoBars_' + Contrat + '-Ech' + Echeance 
@@ -793,6 +840,9 @@ class Bot():
                 FichierATraiter = False
         except IOError:
                 FichierATraiter = True
+
+        finally:
+                print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)
                 
         if FichierATraiter:
             print(datetime.datetime.today() ,"Ecriture fichier " + ficOut)
@@ -820,14 +870,15 @@ class Bot():
         
         ts = datetime.datetime.today()         
         self.fin_flux = self.fin_flux+1
-        print(ts, threading.current_thread().name, "bot.fin_flux:", self.fin_flux, '/', "Requête ", reqId)
+        #print(ts, threading.current_thread().name, "bot.fin_flux:", self.fin_flux, '/', "Requête ", reqId)
 
-        DateFinD = datetime.datetime.strptime(self.TsFinStr, '%Y-%m-%d  %H:%M:%S').date()
-        self.ecrire_fichier(reqId, DateFinD)
+        DateD = datetime.datetime.strptime(self.TsFinStr, '%Y%m%d  %H:%M:%S').date()
+        self.ecrire_fichier(reqId, DateD)
+        self.Determine_Et_Appelle_Requete_Suivante(self.periode)
 
 
 bot = Bot()
-bot.start()
+bot.startBot()
 
 
 

@@ -15,7 +15,7 @@
 import datetime
 HierStr = (datetime.datetime.today() + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")
 
-DateInDebStr="2023-01-03 00:00:00"
+DateInDebStr="2022-12-25 00:00:00"
 
 DateInFinStr = HierStr + " 23:59:59"
 #DateInFinStr = "2022-03-19 03:59:59"
@@ -457,6 +457,9 @@ class IBApi(TestWrapper, TestClient):
     def historicalData(self, reqId:int, bar: BarData):
         #print(datetime.datetime.today(), threading.current_thread().name , "historicalData - ReqId:", reqId, ' Bar:', bar.date)
 
+        if bot.List_Histo_Bars == []:
+            print(datetime.datetime.today(), threading.current_thread().name , "Début Réponse historicalData - ReqId:", reqId, ' Bar:', bar.date)
+            
         isPeriodeCourante15min = False
         isPeriodeCourante5min  = False
         isPeriodeCourante1min  = False
@@ -543,14 +546,17 @@ class Bot():
         VolumeCondition.__setattr__ = utils.setattr_log
     
         #Dataframes pour stocker historique data, mis à jour dans on_bar_update :
-        self.Histo_ohlc_day = pd.DataFrame(columns=['Contrat','Date','open','high','low','close','Volume','EMA20','EMA50','EMA05','RSI14','xopen','xclose','xlow','xhigh','xcouleur'])
-        #self.Histo_ohlc_day.set_index(["Contrat","Date"], inplace=True)
-        self.Histo_ohlc_15min = pd.DataFrame(columns=['Contrat','Echeance','Ts','open','high','low','close','Volume','EMA20','EMA50','EMA05','RSI14','xopen','xclose','xlow','xhigh','xcouleur'])
-        #self.Histo_ohlc_15min.set_index(["Contrat","Ts"], inplace=True)
-        self.Histo_ohlc_5min = pd.DataFrame(columns=['Contrat','Echeance','Ts','open','high','low','close','Volume','EMA20','EMA50','EMA05','RSI14','xopen','xclose','xlow','xhigh','xcouleur'])
-        #self.Histo_ohlc_5min.set_index(["Contrat","Ts"], inplace=True)
-        self.Histo_ohlc_1min = pd.DataFrame(columns=['Contrat','Echeance','Ts','open','high','low','close','Volume','EMA20','EMA50','EMA05','RSI14','xopen','xclose','xlow','xhigh','xcouleur'])
-        #self.Histo_ohlc_1min.set_index(["Contrat","Ts"], inplace=True)
+        # self.Histo_ohlc_day = pd.DataFrame(columns=['Contrat','Date','open','high','low','close','Volume','EMA20','EMA50','EMA05','RSI14','xopen','xclose','xlow','xhigh','xcouleur'])
+        # #self.Histo_ohlc_day.set_index(["Contrat","Date"], inplace=True)
+        # self.Histo_ohlc_15min = pd.DataFrame(columns=['Contrat','Echeance','Ts','open','high','low','close','Volume','EMA20','EMA50','EMA05','RSI14','xopen','xclose','xlow','xhigh','xcouleur'])
+        # #self.Histo_ohlc_15min.set_index(["Contrat","Ts"], inplace=True)
+        # self.Histo_ohlc_5min = pd.DataFrame(columns=['Contrat','Echeance','Ts','open','high','low','close','Volume','EMA20','EMA50','EMA05','RSI14','xopen','xclose','xlow','xhigh','xcouleur'])
+        # #self.Histo_ohlc_5min.set_index(["Contrat","Ts"], inplace=True)
+        # self.Histo_ohlc_1min = pd.DataFrame(columns=['Contrat','Echeance','Ts','open','high','low','close','Volume','EMA20','EMA50','EMA05','RSI14','xopen','xclose','xlow','xhigh','xcouleur'])
+        # #self.Histo_ohlc_1min.set_index(["Contrat","Ts"], inplace=True)
+        
+        self.Histo_ohlc = pd.DataFrame(columns=['Contrat','Echeance','Ts','open','high','low','close','Volume','EMA20','EMA50','EMA05','RSI14','xopen','xclose','xlow','xhigh','xcouleur'])
+        
         self.i_day = 0
         self.i_15min=0
         self.i_5min=0
@@ -566,6 +572,7 @@ class Bot():
         self.DateFinDt = DateInFinDt
         
         self.fin_flux = None
+        self.List_Histo_Bars = []
     
     
     def startBot(self):
@@ -621,8 +628,8 @@ class Bot():
                     print('Journée pas encore traitée:', self.DateStr)
                     JourneeDejaTraiteePourCeContrat = False
 
-            finally:
-                    print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)                    
+            # finally:
+            #         print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)                    
 
         if JourneeDejaTraiteePourCeContrat == False:
             print('===========3 ' + Future_NomContrat + ' - ' + Future_EcheanceContrat + ' - Flux journée suivante :', self.DateStr)
@@ -635,13 +642,13 @@ class Bot():
             dic = {'15min' : '15 mins', '5min':'5 mins', '1min': '1 min'}
             BarSize = dic[TimeUnit]
             self.ib.increment_id()
-            print(datetime.datetime.today(), "Appel requete reqHistoricalData " + BarSize + "..." + Future_NomContrat + ' - ' + Future_EcheanceContrat + 
+            print(datetime.datetime.today(), threading.current_thread().name, "Appel requete reqHistoricalData " + BarSize + "..." + Future_NomContrat + ' - ' + Future_EcheanceContrat + 
                     ' - Jour :', DateFinStrQuery + " - IdReq = " + str(self.ib.reqID))
         
             self.contrat  = Future_NomContrat
             self.echeance = Future_EcheanceContrat
             self.periode  = TimeUnit 
-            print("params:", self.ib.reqID, self.ib.contract, DateFinStrQuery, BarSize )
+            #print("params:", self.ib.reqID, self.ib.contract, DateFinStrQuery, BarSize )
             self.ib.reqHistoricalData(self.ib.reqID, self.ib.contract, DateFinStrQuery,'3 D', BarSize, "TRADES", 0, 1, False, [])
 
         else:
@@ -690,8 +697,8 @@ class Bot():
                 except IOError:
                         print('Journée pas encore traitée:', self.DateStr)
                         JourneeDejaTraiteePourCeContrat = False
-                finally:
-                        print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)
+                # finally:
+                #         print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)
 
                 #Recherche Journée pas déjà traitée, passage au lendemain:
                 while JourneeDejaTraiteePourCeContrat == True and self.DateCourDt.strftime('%Y%m%d') < self.DateFinDt.strftime('%Y%m%d') :
@@ -712,8 +719,8 @@ class Bot():
                         print('Journée pas encore traitée:', self.DateStr)                        
                         JourneeDejaTraiteePourCeContrat = False
 
-                    finally:
-                            print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)
+                    # finally:
+                    #         print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)
                         
                 if JourneeDejaTraiteePourCeContrat:
                     print(datetime.datetime.today(), " fin reception flux de toutes les journées demandées pour ce contrat pour l'unité de temps " + TimeUnit + " ...")
@@ -731,7 +738,8 @@ class Bot():
                 BarSize = dic[TimeUnit]
                 #print(datetime.datetime.today(),"BarSize:",BarSize)
                 self.ib.increment_id()
-                print(datetime.datetime.today(), "Appel requete reqHistoricalData " + BarSize + "..." + Future_NomContrat + ' - ' + Future_EcheanceContrat + 
+                print(datetime.datetime.today(), threading.current_thread().name, 
+                      "Appel requete reqHistoricalData " + BarSize + "..." + Future_NomContrat + ' - ' + Future_EcheanceContrat + 
                         ' - Jour :', DateFinStrQuery + " - IdReq = " + str(self.ib.reqID))
             
                 self.contrat  = Future_NomContrat
@@ -741,7 +749,8 @@ class Bot():
                 self.ib.reqHistoricalData(self.ib.reqID, self.ib.contract, DateFinStrQuery,'3 D', BarSize, "TRADES", 0, 1, False, [])
 
             else:
-                print("fin reception flux de toutes les journées demandées pour tous les contrats pour l'unité de temps " + TimeUnit + "...")
+                print(datetime.datetime.today(), threading.current_thread().name ,
+                      "fin reception flux de toutes les journées demandées pour tous les contrats pour l'unité de temps " + TimeUnit + "...")
                 
                 if TimeUnit == '15min':
                     print("")
@@ -783,6 +792,7 @@ class Bot():
                     
                 else:
                     print("fin reception flux de toutes les journées demandées pour tous les contrats pour TOUTES les unités de temps...")
+                    #self.ib.stop()
 
     def on_bar_update_histo(self, reqId, bar):
 
@@ -792,27 +802,30 @@ class Bot():
         Periode = self.periode
         Echeance = self.echeance
 
+        
+        # Concaténation à la liste globale de cette requete (contrat / echeance / date) :
+        self.List_Histo_Bars = self.List_Histo_Bars + [bar]
            
-        #  15min : 
-        if Periode == '15min':
-            date_ts=datetime.datetime.strptime(bar.date, '%Y%m%d  %H:%M:%S')
-            self.i_15min=self.i_15min+1
-            i=self.i_15min
-            self.Histo_ohlc_15min.loc[i] = [Contrat, Echeance, date_ts, bar.open, bar.high, bar.low, bar.close, bar.volume, None, None, None, None, None, None, None, None, None]
+        # #  15min : 
+        # if Periode == '15min':
+        #     date_ts=datetime.datetime.strptime(bar.date, '%Y%m%d  %H:%M:%S')
+        #     self.i_15min=self.i_15min+1
+        #     i=self.i_15min
+        #     self.Histo_ohlc_15min.loc[i] = [Contrat, Echeance, date_ts, bar.open, bar.high, bar.low, bar.close, bar.volume, None, None, None, None, None, None, None, None, None]
             
-        #  5min :
-        if Periode == '5min':
-            date_ts=datetime.datetime.strptime(bar.date, '%Y%m%d  %H:%M:%S')
-            self.i_5min=self.i_5min+1
-            i=self.i_5min
-            self.Histo_ohlc_5min.loc[i] = [Contrat, Echeance, date_ts, bar.open, bar.high, bar.low, bar.close, bar.volume, None, None, None, None, None, None, None, None, None]
+        # #  5min :
+        # if Periode == '5min':
+        #     date_ts=datetime.datetime.strptime(bar.date, '%Y%m%d  %H:%M:%S')
+        #     self.i_5min=self.i_5min+1
+        #     i=self.i_5min
+        #     self.Histo_ohlc_5min.loc[i] = [Contrat, Echeance, date_ts, bar.open, bar.high, bar.low, bar.close, bar.volume, None, None, None, None, None, None, None, None, None]
 
-        #  1min :
-        if Periode == '1min':
-            date_ts=datetime.datetime.strptime(bar.date, '%Y%m%d  %H:%M:%S')
-            self.i_1min=self.i_1min+1
-            i=self.i_1min
-            self.Histo_ohlc_1min.loc[i] = [Contrat, Echeance, date_ts, bar.open, bar.high, bar.low, bar.close, bar.volume, None, None, None, None, None, None, None, None, None]
+        # #  1min :
+        # if Periode == '1min':
+        #     date_ts=datetime.datetime.strptime(bar.date, '%Y%m%d  %H:%M:%S')
+        #     self.i_1min=self.i_1min+1
+        #     i=self.i_1min
+        #     self.Histo_ohlc_1min.loc[i] = [Contrat, Echeance, date_ts, bar.open, bar.high, bar.low, bar.close, bar.volume, None, None, None, None, None, None, None, None, None]
 
     def  ecrire_fichier(self, reqId, DateD):
 
@@ -843,23 +856,28 @@ class Bot():
 
                        
         if FichierATraiter:
-            print(datetime.datetime.today() ,"Ecriture fichier " + ficOut)
+            print(datetime.datetime.today(), threading.current_thread().name ,"Ecriture fichier " + ficOut)
 
-            if Periode == '1min':
-                F_c = (self.Histo_ohlc_1min['Contrat']   == Contrat)
-                F_e = (self.Histo_ohlc_1min['Echeance']   == Echeance)
-                F_d = (self.Histo_ohlc_1min['Ts'].apply(lambda x: x.date()) == DateD)
-                df  = self.Histo_ohlc_1min.loc[F_c & F_e & F_d]
-            if Periode == '5min':
-                F_c = (self.Histo_ohlc_5min['Contrat']   == Contrat)
-                F_e = (self.Histo_ohlc_5min['Echeance']   == Echeance)
-                F_d = (self.Histo_ohlc_5min['Ts'].apply(lambda x: x.date()) == DateD)
-                df  = self.Histo_ohlc_5min.loc[F_c & F_e & F_d]
-            if Periode == '15min':
-                F_c = (self.Histo_ohlc_15min['Contrat']   == Contrat)
-                F_e = (self.Histo_ohlc_15min['Echeance']   == Echeance)
-                F_d = (self.Histo_ohlc_15min['Ts'].apply(lambda x: x.date()) == DateD)
-                df  = self.Histo_ohlc_15min.loc[F_c & F_e & F_d]
+            F_c = (self.Histo_ohlc['Contrat']   == Contrat)
+            F_e = (self.Histo_ohlc['Echeance']   == Echeance)
+            F_d = (self.Histo_ohlc['Ts'].apply(lambda x: x.date()) == DateD)
+            df  = self.Histo_ohlc.loc[F_c & F_e & F_d]
+
+            # if Periode == '1min':
+            #     F_c = (self.Histo_ohlc_1min['Contrat']   == Contrat)
+            #     F_e = (self.Histo_ohlc_1min['Echeance']   == Echeance)
+            #     F_d = (self.Histo_ohlc_1min['Ts'].apply(lambda x: x.date()) == DateD)
+            #     df  = self.Histo_ohlc_1min.loc[F_c & F_e & F_d]
+            # if Periode == '5min':
+            #     F_c = (self.Histo_ohlc_5min['Contrat']   == Contrat)
+            #     F_e = (self.Histo_ohlc_5min['Echeance']   == Echeance)
+            #     F_d = (self.Histo_ohlc_5min['Ts'].apply(lambda x: x.date()) == DateD)
+            #     df  = self.Histo_ohlc_5min.loc[F_c & F_e & F_d]
+            # if Periode == '15min':
+            #     F_c = (self.Histo_ohlc_15min['Contrat']   == Contrat)
+            #     F_e = (self.Histo_ohlc_15min['Echeance']   == Echeance)
+            #     F_d = (self.Histo_ohlc_15min['Ts'].apply(lambda x: x.date()) == DateD)
+            #     df  = self.Histo_ohlc_15min.loc[F_c & F_e & F_d]
                 
             df.to_csv(ficOut,sep=';',decimal='.',float_format='%.1f', index=False)
 
@@ -867,11 +885,40 @@ class Bot():
         #print(datetime.datetime.today(), threading.current_thread().name , "on_historicalDataEnd - ReqId:", reqId)
         
         ts = datetime.datetime.today()         
-        self.fin_flux = self.fin_flux+1
+        #self.fin_flux = self.fin_flux+1
         #print(ts, threading.current_thread().name, "bot.fin_flux:", self.fin_flux, '/', "Requête ", reqId)
 
+        df_Histo_Bars = pd.DataFrame(self.List_Histo_Bars, columns = ['Bars'])
+        Contrat = self.contrat
+        Periode = self.periode
+        Echeance = self.echeance
+        df_Histo_Bars['Contrat']   = Contrat
+        df_Histo_Bars['Echeance']  = Echeance
+        df_Histo_Bars['Ts']        = df_Histo_Bars['Bars'].apply(lambda x:datetime.datetime.strptime(x.date, '%Y%m%d  %H:%M:%S'))
+        df_Histo_Bars['open']      = df_Histo_Bars['Bars'].apply(lambda x:x.open)
+        df_Histo_Bars['high']      = df_Histo_Bars['Bars'].apply(lambda x:x.high)
+        df_Histo_Bars['low']       = df_Histo_Bars['Bars'].apply(lambda x:x.low)
+        df_Histo_Bars['close']     = df_Histo_Bars['Bars'].apply(lambda x:x.close)
+        df_Histo_Bars['Volume']    = df_Histo_Bars['Bars'].apply(lambda x:x.volume)
+        df_Histo_Bars['EMA20']     = None
+        df_Histo_Bars['EMA50']     = None
+        df_Histo_Bars['EMA05']     = None
+        df_Histo_Bars['RSI14']     = None
+        df_Histo_Bars['xopen']     = None
+        df_Histo_Bars['xclose']    = None
+        df_Histo_Bars['xlow']      = None
+        df_Histo_Bars['xhigh']     = None
+        df_Histo_Bars['xcouleur']  = None
+       
+        cols=['Contrat','Echeance','Ts','open','high','low','close','Volume','EMA20','EMA50','EMA05','RSI14','xopen','xclose','xlow','xhigh','xcouleur']
+        self.Histo_ohlc = df_Histo_Bars[cols]
+        
         DateD = datetime.datetime.strptime(self.TsFinStr, '%Y%m%d  %H:%M:%S').date()
         self.ecrire_fichier(reqId, DateD)
+        
+        #Réinit de la liste des Bars :
+        self.List_Histo_Bars = []
+                
         self.Determine_Et_Appelle_Requete_Suivante(self.periode)
 
 

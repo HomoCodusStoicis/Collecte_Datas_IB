@@ -834,16 +834,14 @@ class Bot():
         # Test fichier resultat déjà existant :
         try:
             with open(ficOut): 
-                print(datetime.datetime.today() ,"Fichier déjà existant : " +  ficOut )
+                print(datetime.datetime.today() ,"Ecrire_Fichier - Fichier déjà existant : " +  ficOut )
                 # print('Backup du fichier '+ ficOut + ' en ' + ficOutBackup)
                 # shutil.move(ficOut, ficOutBackup)
                 FichierATraiter = False
         except IOError:
                 FichierATraiter = True
 
-        finally:
-                print('Journée traitée:', self.DateStr, JourneeDejaTraiteePourCeContrat)
-                
+                       
         if FichierATraiter:
             print(datetime.datetime.today() ,"Ecriture fichier " + ficOut)
 

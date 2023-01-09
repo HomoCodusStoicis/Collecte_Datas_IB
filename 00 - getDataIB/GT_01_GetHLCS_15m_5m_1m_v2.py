@@ -27,7 +27,7 @@ import datetime
 # DateStr = datetime.datetime.today().strftime("%Y-%m-%d")
 # DateStr = "2021-12-23"
 
-repOut = 'Y:\\TRAVAIL\\Mes documents\\Bourse\\Data\\Data API IB\\01 - Histo Bars Minutes'
+repOut = 'M:\\SynologyDrive\\Documents Florent\\Boulot\\030 - Bourse\\Data\\Data API IB\\01 - Histo Bars Minutes'
 
 ListeContratsIn = [["NASDAQ-mini",["202303","202306"]],
                    ["DOW-mini"   ,["202303","202306"]],

@@ -8,7 +8,7 @@ import datetime
 
 HierStr = (datetime.datetime.today() + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")
 
-DateinDebStr="2022-12-30"
+DateinDebStr="2023-01-03"
 DateInFinStr = HierStr
 # DateInFinStr="2022-01-21"
 
@@ -95,7 +95,7 @@ DateCourDt = DateDebDt
 DateStr = DateCourDt.strftime('%Y-%m-%d')
 
 #DateCourDt = DateCourDt + datetime.timedelta(days=1)
-path='Y:\\TRAVAIL\\Mes documents\\Bourse\\Data\\Data API IB\\00 - Histo Ticks\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat +'\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat + "_Q" 
+path='M:\\SynologyDrive\\Documents Florent\\Boulot\\030 - Bourse\\Data\\Data API IB\\00 - Histo Ticks\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat +'\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat + "_Q" 
 FichierHistoTicksJour    =   path + DateStr + '.csv'
 TsDebutStr = DateStr[0:4] + DateStr[5:7] + DateStr[8:10] + " 00:00:00"
 TsFinStr   = DateStr[0:4] + DateStr[5:7] + DateStr[8:10] + " 23:59:59"
@@ -390,7 +390,7 @@ class TestApp(TestWrapper, TestClient):
             self.contract = self.create_contract(Future_NomContrat, Future_EcheanceContrat)  # Create a contract
  
             
-            repertoire = 'Y:\\TRAVAIL\\Mes documents\\Bourse\\Data\\Data API IB\\00 - Histo Ticks\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat
+            repertoire = 'M:\\SynologyDrive\\Documents Florent\\Boulot\\030 - Bourse\\Data\\Data API IB\\00 - Histo Ticks\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat
             path = repertoire + '\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat + "_Q"
 
             if not os.path.exists(repertoire):
@@ -610,7 +610,7 @@ class TestApp(TestWrapper, TestClient):
                 # Filtre pour s'assurer de n'avoir des données que pour la date demandée :
                 F_date = (df_Histo_ticks['Date'] == self.ts_fin_du_jour.strftime("%Y%m%d"))
                
-                if df_Histo_ticks.iloc[0]['ts'] > df_Histo_ticks.iloc[-1]['ts'] :
+                if len(df_Histo_ticks) > 0 and df_Histo_ticks.iloc[0]['ts'] > df_Histo_ticks.iloc[-1]['ts'] :
                     print(datetime.datetime.today(), " Tri du dataframe avant écriture fichier...")
                     df_Histo_ticks.sort_values(by=['ts'],inplace=True)
                     df_Histo_ticks.reset_index(inplace = True)
@@ -632,7 +632,7 @@ class TestApp(TestWrapper, TestClient):
                     self.DateStr = self.DateCourDt.strftime('%Y-%m-%d')
                     Future_NomContrat=ListeContrats[self.contrat_courant][0]
                     Future_EcheanceContrat=ListeContrats[self.contrat_courant][1]
-                    repertoire = 'Y:\\TRAVAIL\\Mes documents\\Bourse\\Data\\Data API IB\\00 - Histo Ticks\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat
+                    repertoire = 'M:\\SynologyDrive\\Documents Florent\\Boulot\\030 - Bourse\\Data\\Data API IB\\00 - Histo Ticks\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat
                     path = repertoire + '\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat + "_Q" 
                     self.FichierHistoTicksJour    =   path + self.DateStr + '.csv'
                     self.TsDebutStr = self.DateStr[0:4] + self.DateStr[5:7] + self.DateStr[8:10] + " 00:00:01"
@@ -671,7 +671,7 @@ class TestApp(TestWrapper, TestClient):
                         self.contract = self.create_contract(Future_NomContrat, Future_EcheanceContrat)  # Create a contract
      
                         
-                        repertoire = 'Y:\\TRAVAIL\\Mes documents\\Bourse\\Data\\Data API IB\\00 - Histo Ticks\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat
+                        repertoire = 'M:\\SynologyDrive\\Documents Florent\\Boulot\\030 - Bourse\\Data\\Data API IB\\00 - Histo Ticks\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat
                         path = repertoire + '\\HistoTicks_' + Future_NomContrat + "-Ech"+ Future_EcheanceContrat + "_Q" 
             
                         if not os.path.exists(repertoire):
